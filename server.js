@@ -5,7 +5,8 @@ const path = require('path');
 const { clog } = require('./Develop/middleware/clog');
 const PORT = process.env.PORT || 3000;
 const { v4: uuidv4 } = require('uuid');
-const { readAndAppend, readFromFile } = require('./Develop/helpers/fsUtils');
+const { readAndAppend, readFromFile, writeToFile } = require('./Develop/helpers/fsUtils');
+const getIndexById = require('util');
 
 //MIDDLEWARE
 app.use(clog) //Logs requests made to the server
@@ -19,15 +20,12 @@ app.use(express.static('./Develop/public')) //Searches for routes in public dire
 app.get('/notes', (req, res) =>
   res.sendFile(path.join(__dirname, '/Develop/public/notes.html'))
 );
-//Route for landing page
-app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, '/Develop/public/index.html'))
-);
 
 
 //API Routes
 app.get('/api/notes', (req,res) => 
-    readFromFile('./Develop/db/db.json').then((data) => res.json(JSON.parse(data)))
+    readFromFile('./Develop/db/db.json').then((data) => res.json(JSON.parse(data)
+    ))
 );
 
 app.post('/api/notes', (req,res) => {
@@ -37,7 +35,7 @@ app.post('/api/notes', (req,res) => {
         const newNote = {
             title,
             text,
-            note_id: uuidv4(),
+            id: uuidv4(),
         };
 
         readAndAppend(newNote, './Develop/db/db.json')
@@ -47,6 +45,24 @@ app.post('/api/notes', (req,res) => {
         res.error('Error in adding tip')
     }
 })
+
+app.delete(`/api/notes/:id`, (req, res) => {
+    console.log("hello")
+    const { id } = req.params
+    console.log(id)
+    readFromFile('./Develop/db/db.json').then((data) => {
+        data = JSON.parse(data)
+        console.log(data)
+        const newNotes = data.filter(data => data.id !== id)
+        console.log(newNotes)
+        writeToFile('./Develop/db/db.json', newNotes)
+    }).then(getAndRenderNotes()) 
+})
+
+//Route for landing page
+app.get('*', (req, res) =>
+  res.sendFile(path.join(__dirname, '/Develop/public/index.html'))
+);
 
 
 app.listen( PORT,()=>{
