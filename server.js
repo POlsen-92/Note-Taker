@@ -6,7 +6,6 @@ const { clog } = require('./public/middleware/clog');
 const PORT = process.env.PORT || 3000;
 const { v4: uuidv4 } = require('uuid');
 const { readAndAppend, readFromFile, writeToFile } = require('./helpers/fsUtils');
-const getIndexById = require('util');
 
 //MIDDLEWARE
 app.use(clog) //Logs requests made to the server
