@@ -56,7 +56,7 @@ app.delete(`/api/notes/:id`, (req, res) => {
         const newNotes = data.filter(data => data.id !== id)
         console.log(newNotes)
         writeToFile('./Develop/db/db.json', newNotes)
-    }).then(getAndRenderNotes()) 
+    }).then(getAndRenderNotes());
 })
 
 //Route for landing page
