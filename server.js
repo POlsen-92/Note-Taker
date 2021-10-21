@@ -2,29 +2,29 @@
 const express = require("express");
 const app = express();
 const path = require('path');
-const { clog } = require('./Develop/middleware/clog');
+const { clog } = require('./public/middleware/clog');
 const PORT = process.env.PORT || 3000;
 const { v4: uuidv4 } = require('uuid');
-const { readAndAppend, readFromFile, writeToFile } = require('./Develop/helpers/fsUtils');
+const { readAndAppend, readFromFile, writeToFile } = require('./helpers/fsUtils');
 const getIndexById = require('util');
 
 //MIDDLEWARE
 app.use(clog) //Logs requests made to the server
 app.use(express.json()) //
 app.use(express.urlencoded({ extended:true })) //method inbuilt in express to recognize the incoming Request Object as strings or arrays.
-app.use(express.static('./Develop/public')) //Searches for routes in public directory first
+app.use(express.static('./public')) //Searches for routes in public directory first
 
 
 //HTML Routes
 //Route for note page
 app.get('/notes', (req, res) =>
-  res.sendFile(path.join(__dirname, '/Develop/public/notes.html'))
+  res.sendFile(path.join(__dirname, '/public/notes.html'))
 );
 
 
 //API Routes
 app.get('/api/notes', (req,res) => 
-    readFromFile('./Develop/db/db.json').then((data) => res.json(JSON.parse(data)
+    readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)
     ))
 );
 
@@ -38,7 +38,7 @@ app.post('/api/notes', (req,res) => {
             id: uuidv4(),
         };
 
-        readAndAppend(newNote, './Develop/db/db.json')
+        readAndAppend(newNote, './db/db.json')
 
         res.json('Note added Successfully');
     } else {
@@ -50,18 +50,18 @@ app.delete(`/api/notes/:id`, (req, res) => {
     console.log("hello")
     const { id } = req.params
     console.log(id)
-    readFromFile('./Develop/db/db.json').then((data) => {
+    readFromFile('./db/db.json').then((data) => {
         data = JSON.parse(data)
         console.log(data)
         const newNotes = data.filter(data => data.id !== id)
         console.log(newNotes)
-        writeToFile('./Develop/db/db.json', newNotes)
+        writeToFile('./db/db.json', newNotes)
     }).then(getAndRenderNotes());
 })
 
 //Route for landing page
 app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, '/Develop/public/index.html'))
+  res.sendFile(path.join(__dirname, '/public/index.html'))
 );
 
 
